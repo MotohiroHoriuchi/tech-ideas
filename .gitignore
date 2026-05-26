@@ -1,0 +1,6 @@
+.obsidian/
+001_Zenn/
+.DS_Store
+tmp/
+__pycache__/
+*.pyc

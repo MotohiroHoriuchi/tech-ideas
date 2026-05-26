@@ -1,0 +1,73 @@
+@startuml
+!theme plain
+skinparam defaultFontName "Hiragino Sans"
+skinparam ArrowColor #444444
+skinparam PackageBorderColor #888888
+
+actor "ユーザー" as User
+
+package "GitHub Repository (tech-ideas)" {
+    folder "002_Idea/" as Idea {
+        file "00001_*.md" as IdeaFile
+    }
+    folder "100_HotArticles/" as Hot {
+        file "YYYY-MM-DD.md" as HotFile
+    }
+    folder "101_PriorReserch/" as Research {
+        file "00001_*.md" as ResFile
+    }
+    folder "scripts/" {
+        component "hot_articles.py" as HS
+        component "idea_research.py" as IS
+        component "notify.py" as NS
+    }
+    folder "tmp/" {
+        file "hot.json" as HotJSON
+        file "research.json" as ResJSON
+    }
+}
+
+cloud "GitHub Actions\ndaily.yml\n(毎朝 10:00 JST)" as GA
+
+package "Zenn API（無料・認証不要）" {
+    [GET /api/articles\n?order=trending&count=10] as TrendAPI
+    [GET /api/search\n?q={query}&source=articles] as SearchAPI
+}
+
+cloud "LINE Messaging API" as LINE
+
+node "Obsidian (iCloud sync)" as Obsidian
+
+GA --> HS : 1. 実行
+HS --> TrendAPI : トレンド 10件取得
+HS --> HotFile : md 生成
+HS --> HotJSON : 結果を出力
+
+GA --> IS : 2. 実行
+IS --> IdeaFile : 002_Idea/ スキャン\n(00001_*.md)
+IS --> SearchAPI : 関連記事検索\n(topics優先 / titleフォールバック)
+IS --> ResFile : md 追記（7日間）
+IS --> ResJSON : 結果を出力
+
+GA --> NS : 3. 実行
+NS --> HotJSON : 読み込み
+NS --> ResJSON : 読み込み
+NS --> LINE : 1通に合成して push
+
+GA --> Obsidian : 4. git commit & push
+
+User --> Obsidian : git pull（手動 or cron）
+User <-- LINE : 朝の通知 1通
+User --> IdeaFile : アイデアを書く
+
+note right of IS
+  research_start から 7日経過した
+  アイデアはスキップ
+end note
+
+note right of NS
+  research 更新がない日は
+  Hot Articles セクションのみ
+end note
+
+@enduml
