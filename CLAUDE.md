@@ -1,45 +1,44 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+このファイルはリポジトリ内で Claude Code (claude.ai/code) が参照するガイダンスです。
 
-## Repository overview
+<overview>
+技術アイデア管理用の Obsidian ボルト。Zenn 執筆プロジェクトと併用する。iCloud で同期。
 
-This is an Obsidian vault for technical idea management, combined with a Zenn publication project. The vault is synced via iCloud.
+| パス | 用途 |
+|------|------|
+| `001_Zenn/` | Zenn 執筆プロジェクト（独自の `.git` リポジトリあり） |
+| `002_Idea/` | 自由記述のアイデアノート |
+| `100_HotArticles/` | 毎日の Zenn トレンド記事まとめ（YAMLフロントマター + テーブル） |
+| `101_PriorReserch/` | `002_Idea/` のアイデアに紐づく調査ノート |
+</overview>
 
-## Directory layout
-
-| Path | Purpose |
-|------|---------|
-| `001_Zenn/` | Zenn publication project (has its own `.git` repo) |
-| `002_Idea/` | Freeform idea notes in Markdown |
-| `100_HotArticles/` | Daily Zenn trending article digests (YAML frontmatter + table) |
-| `101_PriorReserch/` | Research notes linked to ideas in `002_Idea/` |
-
-## Zenn article workflow (`001_Zenn/`)
+<zenn>
+コマンド:
 
 ```bash
 cd 001_Zenn
-npx zenn new:article          # scaffold a new article
-npx zenn preview              # local preview at http://localhost:8000
+npx zenn new:article          # 記事の雛形作成
+npx zenn preview              # ローカルプレビュー http://localhost:8000
 ```
 
-Publishing is done by pushing to GitHub (Zenn syncs from the repo). There is no build or test step.
+公開は GitHub へ push するだけ（Zenn がリポジトリと同期）。ビルドやテストのステップはない。
 
-### Article frontmatter
+記事フロントマター:
 
 ```yaml
 ---
 title: ""
 emoji: ""
-type: idea          # "idea" or "tech"
+type: idea          # "idea" または "tech"
 topics: []
 published: true
 ---
 ```
+</zenn>
 
-## Markdown conventions for `100_HotArticles/` and `101_PriorReserch/`
-
-Files use YAML frontmatter followed by a Markdown table. Example shape for `100_HotArticles/YYYY-MM-DD.md`:
+<markdown-conventions>
+`100_HotArticles/YYYY-MM-DD.md`:
 
 ```yaml
 ---
@@ -49,11 +48,11 @@ type: hot-articles
 ---
 ```
 
-`101_PriorReserch/` files additionally carry an `idea` field pointing to the source file in `002_Idea/` and use an Obsidian wikilink (`[[002_Idea/filename.md]]`) for cross-referencing.
+`101_PriorReserch/` のファイルは `idea` フィールドで `002_Idea/` の元ファイルを指し、Obsidian のウィキリンク（`[[002_Idea/filename.md]]`）で相互参照する。
+</markdown-conventions>
 
-## Automation pipeline
-
-### Running locally
+<automation>
+ローカル実行:
 
 ```bash
 pip install requests pyyaml
@@ -64,39 +63,30 @@ python scripts/idea_research.py  # → 101_PriorReserch/<slug>.md + tmp/research
 LINE_CHANNEL_ACCESS_TOKEN=xxx LINE_USER_ID=xxx python scripts/notify.py
 ```
 
-### GitHub Actions
+GitHub Actions: `.github/workflows/daily.yml` が `cron: '0 1 * * *'`（毎朝 10:00 JST）で実行。
+リポジトリシークレット `LINE_CHANNEL_ACCESS_TOKEN`、`LINE_USER_ID` が必要。
+実行後、`100_HotArticles/` と `101_PriorReserch/` の変更をコミット・プッシュする。
 
-`.github/workflows/daily.yml` — runs at 10:00 JST via `cron: '0 1 * * *'`.  
-Requires two repository secrets: `LINE_CHANNEL_ACCESS_TOKEN`, `LINE_USER_ID`.  
-After scripts run, commits `100_HotArticles/` and `101_PriorReserch/` changes and pushes.
-
-### Idea file naming
-
-Files in `002_Idea/` must follow `00001_<slug>.md` (zero-padded 5-digit prefix).  
-The corresponding research file is `101_PriorReserch/00001_<slug>.md`.
+`002_Idea/` のファイル名は `00001_<slug>.md`（0埋め5桁プレフィックス）。
+対応する調査ファイルは `101_PriorReserch/00001_<slug>.md`。
 
 ```yaml
-# frontmatter in 002_Idea files
+# 002_Idea ファイルのフロントマター
 title: "アイデアタイトル"
-topics: [keyword1, keyword2]   # used as Zenn search query; falls back to title[:50]
+topics: [keyword1, keyword2]   # Zenn 検索クエリに使用。なければ title の先頭50文字にフォールバック
 ```
 
-### Design docs
+`.design/` に設計資料を格納:
+- `system.pu` — PlantUML システム構成図
+- `overview.md` — 設計概要 / Zenn 記事下書き
+- `api-notes.md` — Zenn API・LINE API リファレンス
+</automation>
 
-`.design/` stores architecture documents:
-- `system.pu` — PlantUML system diagram
-- `overview.md` — design doc / Zenn article draft
-- `api-notes.md` — Zenn API and LINE API reference
+<context>
+GitHub Actions パイプライン:
+1. 毎日 Zenn トレンド記事 10件を取得 → `100_HotArticles/YYYY-MM-DD.md` に保存
+2. `002_Idea/` をスキャンして関連記事を調査 → `101_PriorReserch/` に追記（アイデアごとに7日間）
+3. LINE Messaging API でオーナーに1通まとめて送信
 
-## Recurring automation context
-
-The owner is building a GitHub Actions pipeline that:
-1. Fetches the top 10 Zenn trending articles daily → writes `100_HotArticles/YYYY-MM-DD.md`
-2. Scans `002_Idea/` for recent idea files → searches Zenn for related articles → writes `101_PriorReserch/` (runs daily for ~7 days per idea)
-3. Sends results via LINE Messaging API (push message to owner's user ID)
-
-Secrets used: `LINE_CHANNEL_ACCESS_TOKEN`, `LINE_USER_ID`.
-
-## AI agent pattern used in this project
-
-The articles and automation scripts follow an "AI-as-hub" architecture: Bash scripts handle only file I/O and service wiring; all judgment, format conversion, and error handling is delegated to an AI agent via CLI (`claude --print`, `agy`, etc.). Prompts live in separate `.txt` template files; scripts substitute `{{PLACEHOLDER}}` variables before invoking the AI. This keeps AI models swappable by changing only the CLI command name.
+自動化スクリプトは「AI をハブにする」アーキテクチャに従う: Bash スクリプトはファイル I/O と配線のみ担当し、判断・変換はすべて AI エージェント CLI（`claude --print`、`agy` など）に委譲する。CLI コマンド名を変えるだけでモデルを差し替えられる。
+</context>
