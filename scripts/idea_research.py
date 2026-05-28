@@ -35,8 +35,8 @@ def parse_frontmatter(text: str) -> dict:
 
 def build_query(fm: dict, filename: str) -> str:
     topics = fm.get("topics")
-    if topics and isinstance(topics, list):
-        return " ".join(str(t) for t in topics)
+    if topics and isinstance(topics, list) and topics:
+        return str(topics[0])
     title = fm.get("title", "")
     return str(title)[:50] if title else filename
 
@@ -95,6 +95,11 @@ def process_idea(idea_path: Path) -> dict | None:
 
     query = build_query(fm, slug)
     articles = search_zenn(query)
+    if not articles:
+        title_query = str(fm.get("title", ""))[:50] or slug
+        if title_query != query:
+            query = title_query
+            articles = search_zenn(query)
     if not articles:
         return None
 
