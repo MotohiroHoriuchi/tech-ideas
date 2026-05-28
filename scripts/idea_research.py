@@ -33,14 +33,6 @@ def parse_frontmatter(text: str) -> dict:
         return {}
 
 
-def build_query(fm: dict, filename: str) -> str:
-    topics = fm.get("topics")
-    if topics and isinstance(topics, list) and topics:
-        return str(topics[0])
-    title = fm.get("title", "")
-    return str(title)[:50] if title else filename
-
-
 def search_zenn(query: str, count: int = 10) -> list[dict]:
     resp = requests.get(
         ZENN_SEARCH,
@@ -49,6 +41,24 @@ def search_zenn(query: str, count: int = 10) -> list[dict]:
     )
     resp.raise_for_status()
     return resp.json().get("articles", [])
+
+
+def search_zenn_multi(fm: dict, filename: str, count: int = 10) -> tuple[str, list[dict]]:
+    """各トピックを個別に検索してマージ（likes降順・重複除去）。0件ならtitleにフォールバック。"""
+    topics = fm.get("topics")
+    queries = [str(t) for t in topics] if topics and isinstance(topics, list) else []
+    title = str(fm.get("title", ""))[:50] or filename
+    if title not in queries:
+        queries.append(title)
+
+    seen: dict[str, dict] = {}
+    for q in queries:
+        for a in search_zenn(q, count):
+            seen.setdefault(a["path"], a)
+
+    used_query = " / ".join(queries[:-1]) if len(queries) > 1 else (queries[0] if queries else filename)
+    articles = sorted(seen.values(), key=lambda a: a["liked_count"], reverse=True)[:count]
+    return used_query, articles
 
 
 def build_research_header(idea_file: str, title: str, research_start: str) -> str:
@@ -93,13 +103,7 @@ def process_idea(idea_path: Path) -> dict | None:
     else:
         research_start = TODAY
 
-    query = build_query(fm, slug)
-    articles = search_zenn(query)
-    if not articles:
-        title_query = str(fm.get("title", ""))[:50] or slug
-        if title_query != query:
-            query = title_query
-            articles = search_zenn(query)
+    query, articles = search_zenn_multi(fm, slug)
     if not articles:
         return None
 
