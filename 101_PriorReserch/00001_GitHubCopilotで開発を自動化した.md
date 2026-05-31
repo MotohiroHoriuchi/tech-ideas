@@ -1,7 +1,7 @@
 ---
 idea: 002_Idea/00001_GitHubCopilotで開発を自動化した.md
 research_start: 2026-05-28
-last_updated: 2026-05-30
+last_updated: 2026-05-31
 ---
 
 # 関連記事: GitHubCopilotで開発を自動化した
@@ -52,3 +52,18 @@ last_updated: 2026-05-30
 | 8 | 【Claude Code ✖Obsidian】自分用ルールをskillsを使ってAIに自動読み込み・更新させる仕組みを作ってみた | moromorojohnson | 19 | https://zenn.dev/arm_techblog/articles/ea4a436c5b80bb |
 | 9 | お前達にも教えよう。SnowflakeのAgent Sharingがすごくすごいことを。 | kommy339 | 17 | https://zenn.dev/truestar/articles/72183e3b2e619c |
 | 10 | 車輪の再発明？上等だよ！Agent Skills同期CLIを作った | takemo101 | 15 | https://zenn.dev/sonicmoov/articles/98d87d37869551 |
+
+## 2026-05-31
+
+| # | タイトル | 著者 | いいね | URL |
+|---|---------|------|--------|-----|
+| 1 | Prisma を使った効率的なバックエンド開発ワークフロー | optimisuke | 157 | https://zenn.dev/optimisuke/articles/387b30c547ac54 |
+| 2 | ChatGPT・GitHubCopilotを使用したAI時代のアプリケーション開発 | raku | 70 | https://zenn.dev/raku/articles/7b647a11a7a766 |
+| 3 | GithubCopilot経由で､ClineでClaude3.7をエラー無く使う方法 | eightbeat | 62 | https://zenn.dev/eightbeat/articles/9128dd906c3654 |
+| 4 | Claude Code Skillsで開発ワークフローを効率化している話 | takashiasanuma | 57 | https://zenn.dev/berry_blog/articles/8d1b2c9216b4e9 |
+| 5 | 【Claude Code ✖Obsidian】自分用ルールをskillsを使ってAIに自動読み込み・更新させる仕組みを作ってみた | moromorojohnson | 26 | https://zenn.dev/arm_techblog/articles/ea4a436c5b80bb |
+| 6 | GitHubCopilotのMetricsAPIとMicrosoft Fabricを組み合わせて社内のCopilot利用状況を可視化してみた | ikebowsan | 22 | https://zenn.dev/headwaters/articles/84bb6d9cf3ed8d |
+| 7 | Claude Code の Dynamic Workflows を触ってみた: マルチエージェント並列オーケストレーションの概念と体験 | rf_p | 15 | https://zenn.dev/canly/articles/45da96250c7028 |
+| 8 | Issue 分割してもコンテキストを失わない、PLANS.md で実装計画を定型化する AI 駆動開発ワークフロー | sasamuku | 15 | https://zenn.dev/sasamuku/articles/08ed3acac31e2a |
+| 9 | 改善要望開発ワークフローをClaude Codeで構築する 〜Agentic Workflow実践事例〜 | masarufuruya | 15 | https://zenn.dev/icare/articles/9e277188780755 |
+| 10 | Agent Skills で AI への依頼を設計する | i9wa4 | 11 | https://zenn.dev/genda_jp/articles/2026-05-28-agent-skills-ai-interaction |
